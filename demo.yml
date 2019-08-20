@@ -1,0 +1,14 @@
+- hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Configure port 2 with duplex 'full' and speed '1000'
+      freebox_os_switch_port:
+        id: 2
+        duplex: 'full'
+        speed: 100
+      register: result
+
+    # - debug:
+    #     var: result

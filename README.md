@@ -1,2 +1,3 @@
-# ansible-modules-freebox_os
+# ansible-modules-freebox-os
+
 Ansible modules for Freebox OS
