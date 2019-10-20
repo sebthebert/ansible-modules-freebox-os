@@ -2,19 +2,25 @@
   gather_facts: no
 
   vars:
+    freebox_app_id: com.ansible.modules.freebox
+    freebox_app_name: Ansible modules for Freebox OS
     freebox_url: http://mafreebox.freebox.fr
 
   tasks:
     
-    - name: Get Freebox OS API version ('{{ freebox.url }}/api_version')
+    - name: Get Freebox OS API version ('{{ freebox_url }}/api_version')
       uri:
         url: "{{ freebox_url }}/api_version"
         method: GET
       register: freebox_api
 
+    - name: Set 'freebox_api_version' variable to '{{ freebox_api.json.api_version.split('.')[0] }}'
+      set_fact:
+        freebox_api_version: "{{ freebox_api.json.api_version.split('.')[0] }}"
+
     - name: Set 'url_authorize' variable to '{{ freebox_url }}{{ freebox_api.json.api_base_url }}v{{ freebox_api.json.api_version.split('.')[0] }}/login/authorize'
       set_fact:
-        url_authorize: "{{ freebox_url }}{{ freebox_api.json.api_base_url }}v4/login/authorize"
+        url_authorize: "{{ freebox_url }}{{ freebox_api.json.api_base_url }}v{{ freebox_api_version }}/login/authorize"
 
     - name: Get authorization for Freebox Ansible modules ('{{ url_authorize }}')
       uri:
@@ -22,17 +28,22 @@
         method: POST
         body_format: json
         body:
-          app_id: com.ansible.modules.freebox
-          app_name: Ansible modules for Freebox OS
-          app_version: 4 
-          #"{{ freebox_api.json.api_version.split('.')[0] }}"
+          app_id: "{{ freebox_app_id }}"
+          app_name: "{{ freebox_app_name }}"
+          app_version: "{{ freebox_api_version }}"
           device_name: Ansible
       register: authorization
-    
-    - debug:
-        msg: "{{ authorization }}"
 
     - debug:
         msg: |
           Freebox OS App Token: {{ authorization.json.result.app_token }}
           Track ID: {{ authorization.json.result.track_id }}
+
+    - pause:
+        prompt: "Accept it on your Freebox LCD Screen and press a key"
+
+    - uri:
+        url: "{{ url_authorize }}/{{ authorization.json.result.track_id }}"
+        method: GET
+    
+    
