@@ -4,7 +4,7 @@
 
 You need to configure your Freebox to accept API requests.
 
-Launch the [ìnitialize.yml](initialize.yml)  playbook and accept the request on your Freebox LCD Screen.
+Launch the [initialize.yml](initialize.yml)  playbook and accept the request on your Freebox LCD Screen.
 
 Then, go to `Paramètres de la Freebox > Divers / Gestion des Accès > Applications`
 
