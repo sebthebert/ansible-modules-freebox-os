@@ -4,13 +4,13 @@
 
 You need to configure your Freebox to accept API requests.
 
-Launch the ['ìnitialize.yml' playbook](initialize.yml) and accept the request on your Freebox LCD Screen.
+Launch the [ìnitialize.yml](initialize.yml)  playbook and accept the request on your Freebox LCD Screen.
 
-Then, go to `Parametres de la Freebox > Divers / Gestion des Acces > Applications`
+Then, go to `Paramètres de la Freebox > Divers / Gestion des Accès > Applications`
 
-and check `Modification des reglages de la Freebox`.
+and check :white_check_mark: `Modification des réglages de la Freebox`.
 
-![test](freebox_gestion_acces_applications.png "Check 'Modification des reglages de la Freebox'")
+![test](freebox_gestion_acces_applications.png "Check 'Modification des réglages de la Freebox'")
 
 ## Modules
 
