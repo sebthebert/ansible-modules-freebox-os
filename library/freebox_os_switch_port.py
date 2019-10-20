@@ -11,7 +11,7 @@ DOCUMENTATION = '''
 ---
 module: freebox_os_switch_port
 
-short_description: Configure Switch Port for Freebox OS
+short_description: Configure Switch Port on Freebox OS
 
 version_added: "2.8"
 
@@ -38,8 +38,8 @@ author:
 '''
 
 EXAMPLES = '''
-# Configure port 2 with duplex 'full' and speed '1000'
-- name: Configure port 2 with duplex 'full' and speed '1000'
+# Configure Freebox Router port '2' with 'full' duplex and speed '1000'
+- name: Configure port '2' with 'full' duplex and speed '1000'
   freebox_os_switch_port:
     id: 2
     duplex: 'full'
@@ -50,42 +50,26 @@ RETURN = '''
 
 '''
 
-import hashlib
-import hmac
 import json
-import os
 import requests
 
 from ansible.module_utils.basic import AnsibleModule
 
-available_portid = ['1', '2', '3', '4']
-available_duplex = ['auto', 'half', 'full']
-available_speed = ['auto', '10', '100', '1000']
+try:
+    from library.module_utils.network.freebox_os import freebox_os_api_url, freebox_os_api_login
+except ImportError:
+    from ansible.module_utils.network.freebox_os import freebox_os_api_url, freebox_os_api_login
 
-freebox_os_api_appid = 'com.ansible.modules.freebox'
-freebox_os_api_url = os.getenv('FREEBOX_OS_API_URL', 'http://mafreebox.freebox.fr/api/v6')
-response = requests.get(freebox_os_api_url + '/login')
-json_data = json.loads(response.text)
-challenge = json_data['result']['challenge']
+available_portid = [ 1, 2, 3, 4 ]
+available_duplex = [ 'auto', 'half', 'full' ]
+available_speed = [ 'auto', '10', '100', '1000' ]
 
-response = requests.get(freebox_os_api_url + '/login/authorize/13')
-
-app_token = os.getenv('FREEBOX_OS_API_APP_TOKEN', '')
-payload = {'app_id': freebox_os_api_appid, 'password': hmac.new(app_token,challenge,hashlib.sha1).hexdigest()}
-payload = json.dumps(payload)
-
-response = requests.post(freebox_os_api_url + '/login/session', data=payload)
-
-json_data = json.loads(response.text)
-session_token = json_data['result']['session_token']
-
-
-headers = {"X-Fbx-App-Auth": session_token}
-
+session_token = freebox_os_api_login()
+headers = { "X-Fbx-App-Auth": session_token }
 
 def main():
     module_args = dict(
-        id=dict(type='str', required=True),
+        id=dict(type='int', required=True),
         duplex=dict(type='str', required=False),
         speed=dict(type='str', required=False)
     )
@@ -106,9 +90,8 @@ def main():
         module.fail_json(msg="Invalid 'speed' value", **result)
 
     # Request to Freebox OS API '/switch/port/<id>'
-    response = requests.get(freebox_os_api_url + '/switch/port/' + module.params['id'], headers=headers)
+    response = requests.get(freebox_os_api_url + '/switch/port/' + str(module.params['id']), headers=headers)
     json_data = json.loads(response.text)
-
     if module.params['duplex'] != json_data['result']['duplex']:
         result['changed'] = True
     if module.params['speed'] != json_data['result']['speed']:
@@ -117,7 +100,7 @@ def main():
     if result['changed'] == True and module.check_mode == False:
         payload = {'duplex': module.params['duplex'], 'speed': module.params['speed']}
         payload = json.dumps(payload)
-        response = requests.put(freebox_os_api_url + '/switch/port/' + module.params['id'], data=payload, headers=headers)
+        response = requests.put(freebox_os_api_url + '/switch/port/' + str(module.params['id']), data=payload, headers=headers)
         result['msg'] = response.text
 
     module.exit_json(**result)
