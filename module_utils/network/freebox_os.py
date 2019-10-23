@@ -1,3 +1,4 @@
+"""Freebox OS API generic functions used by freebox_os_* Ansible modules."""
 import hashlib
 import hmac
 import json
@@ -8,6 +9,7 @@ freebox_os_api_appid = 'com.ansible.modules.freebox'
 freebox_os_url = os.getenv('FREEBOX_OS_URL', 'http://mafreebox.freebox.fr')
 
 def freebox_os_api_version():
+    """Return Freebox OS API major version."""
     response = requests.get(freebox_os_url + '/api_version')
     json_data = json.loads(response.text)
 
@@ -16,6 +18,10 @@ def freebox_os_api_version():
 freebox_os_api_url = freebox_os_url + '/api/v' + freebox_os_api_version()
 
 def freebox_os_api_login():
+    """Login to Freebox OS API.
+
+    Returns a session token
+    """
     response = requests.get(freebox_os_api_url + '/login')
     json_data = json.loads(response.text)
     challenge = json_data['result']['challenge']
